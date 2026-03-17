@@ -23,8 +23,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Pass the product ID to the checkout page
     Route::get('/checkout/{id}', [StripePaymentController::class, 'show'])->name('checkout');
+    Route::post('/payment/intent', [StripePaymentController::class, 'createIntent'])->name('payment.intent');
 });
 
 Route::middleware('auth')->group(function () {

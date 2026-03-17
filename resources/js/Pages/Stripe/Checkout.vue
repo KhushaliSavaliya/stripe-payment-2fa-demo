@@ -1,10 +1,26 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import { onMounted, ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     product: Object,
     stripeKey: String
+});
+
+const clientSecret = ref(null);
+
+onMounted(async () => {
+    try {
+        const response = await axios.post(route('payment.intent'), {
+            product_id: props.product.id
+        });
+        clientSecret.value = response.data.clientSecret;
+        console.log("Stripe Intent Ready!");
+    } catch (error) {
+        console.error("Failed to create intent", error);
+    }
 });
 </script>
 
