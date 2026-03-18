@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
+import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 
 const props = defineProps({
@@ -9,52 +9,71 @@ const props = defineProps({
     stripeKey: String
 });
 
-const clientSecret = ref(null);
+const stripe = ref(null);
+const elements = ref(null);
+const isLoading = ref(true);
+const errorMessage = ref(null);
 
 onMounted(async () => {
+    stripe.value = await loadStripe(props.stripeKey);
+
     try {
-        const response = await axios.post(route('payment.intent'), {
+        const { data } = await axios.post(route('payment.intent'), {
             product_id: props.product.id
         });
-        clientSecret.value = response.data.clientSecret;
-        console.log("Stripe Intent Ready!");
-    } catch (error) {
-        console.error("Failed to create intent", error);
+
+        elements.value = stripe.value.elements({ clientSecret: data.clientSecret });
+
+        const paymentElement = elements.value.create('payment');
+        paymentElement.mount('#payment-element');
+        
+        isLoading.value = false;
+    } catch (e) {
+        errorMessage.value = "Failed to load payment system.";
     }
 });
+
+const handleSubmit = async () => {
+    if (!stripe.value || !elements.value) return;
+
+    const { error } = await stripe.value.confirmPayment({
+        elements: elements.value,
+        confirmParams: {
+            return_url: window.location.origin + '/dashboard',
+        },
+    });
+
+    if (error) {
+        errorMessage.value = error.message;
+    }
+};
 </script>
 
 <template>
-    <Head title="Secure Checkout" />
-
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Checkout</h2>
-        </template>
-
         <div class="py-12">
-            <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 flex flex-col md:flex-row gap-8">
-                    
-                    <div class="w-full md:w-1/2">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-                        <div class="flex items-center gap-4 p-4 border rounded-lg">
-                            <img :src="product.image" class="w-20 h-20 object-cover rounded shadow">
-                            <div>
-                                <h4 class="font-bold">{{ product.name }}</h4>
-                                <p class="text-indigo-600 font-bold">${{ (product.price / 100).toFixed(2) }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="w-full md:w-1/2 border-t md:border-t-0 md:border-l pt-6 md:pt-0 md:pl-8">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Details</h3>
-                        <div class="bg-gray-50 p-10 rounded-lg border-2 border-dashed border-gray-200 text-center">
-                            <p class="text-gray-500 text-sm">Stripe Payment Element (2FA/3DS) will be injected here in the next step.</p>
-                        </div>
-                    </div>
-
+            <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow border">
+                <h2 class="text-2xl font-bold mb-6">Complete Payment</h2>
+                
+                <div class="mb-6 p-4 bg-gray-50 rounded">
+                    <p class="font-bold">{{ product.name }}</p>
+                    <p class="text-indigo-600 text-xl font-bold">${{ (product.price / 100).toFixed(2) }}</p>
                 </div>
+
+                <form @submit.prevent="handleSubmit">
+                    <div id="payment-element" class="mb-6"></div>
+                    
+                    <button 
+                        :disabled="isLoading"
+                        class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                        {{ isLoading ? 'Loading...' : 'Pay Securely' }}
+                    </button>
+
+                    <div v-if="errorMessage" class="mt-4 text-red-600 text-sm">
+                        {{ errorMessage }}
+                    </div>
+                </form>
             </div>
         </div>
     </AuthenticatedLayout>
