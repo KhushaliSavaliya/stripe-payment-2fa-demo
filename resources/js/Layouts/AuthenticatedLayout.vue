@@ -6,7 +6,9 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { useCart } from '@/cart.js';
 
+const { items, total } = useCart();
 const showingNavigationDropdown = ref(false);
 </script>
 
@@ -19,9 +21,9 @@ const showingNavigationDropdown = ref(false);
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
-                        <div class="flex">
+                        <div class="flex gap-4">
                             <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
+                            <div class="flex shrink-0 items-center ">
                                 <Link :href="route('dashboard')">
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800"
@@ -39,6 +41,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                            </div>
+
+                            <div class="flex items-center ms-10">
+                                <Link :href="route('checkout.cart')" class="text-sm font-medium text-gray-700">
+                                    🛒 Cart ({{ items.length }} items) - ${{ (total / 100).toFixed(2) }}
+                                </Link>
                             </div>
                         </div>
 

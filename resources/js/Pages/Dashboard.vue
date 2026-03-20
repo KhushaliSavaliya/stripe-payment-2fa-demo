@@ -1,8 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3'; // <--- Added Link here
+import { Head, Link } from '@inertiajs/vue3';
+import { useCart } from '@/cart.js';
 
-// Define the products prop coming from your ProductController
+
+const { addToCart, items } = useCart();
+
 defineProps({
     products: Array
 });
@@ -33,12 +36,18 @@ defineProps({
                                     ${{ (product.price / 100).toFixed(2) }}
                                 </span>
                                 
-                                <Link 
+                                <!-- <Link 
                                     :href="route('checkout', product.id)" 
                                     class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
                                 >
                                     Buy Now
-                                </Link>
+                                </Link> -->
+                                <button 
+                                    @click="addToCart(product)"
+                                    class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+                                >
+                                    Add to Cart ({{ items.filter(i => i.id === product.id)[0]?.quantity || 0 }})
+                                </button>
                             </div>
                         </div>
                     </div>
