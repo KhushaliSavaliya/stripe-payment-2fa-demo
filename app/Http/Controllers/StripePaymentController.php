@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
@@ -21,25 +23,53 @@ class StripePaymentController extends Controller
 
     public function createIntent(Request $request)
     {
-        $request->validate(['product_id' => 'required|exists:products,id']);
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $product = Product::find($request->product_id);
-
         try {
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'total_amount' => 0,
+                'status' => 'pending',
+            ]);
+
+            $total = 0;
+
+            foreach ($request->items as $item) {
+                $product = Product::find($item['id']);
+                $itemTotal = $product->price * $item['quantity'];
+                $total += $itemTotal;
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $item['quantity'],
+                    'price_at_purchase' => $product->price,
+                ]);
+            }
+
+            $order->update(['total_amount' => $total]);
+
             $intent = PaymentIntent::create([
-                'amount' => $product->price,
+                'amount' => $total,
                 'currency' => 'usd',
                 'automatic_payment_methods' => ['enabled' => true],
                 'metadata' => [
-                    'product_id' => $product->id,
+                    'order_id' => $order->id,
                     'user_id' => auth()->id(),
                 ],
             ]);
 
+            $order->update(['stripe_payment_intent_id' => $intent->id]);
+
             return response()->json([
-                'clientSecret' => $intent->client_secret
+                'clientSecret' => $intent->client_secret,
+                'order_id' => $order->id
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

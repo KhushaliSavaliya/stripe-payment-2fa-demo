@@ -14,22 +14,26 @@ const elements = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref(null);
 
+const { items } = useCart();
+
 onMounted(async () => {
     stripe.value = await loadStripe(props.stripeKey);
 
     try {
         const { data } = await axios.post(route('payment.intent'), {
-            product_id: props.product.id
+            items: items.value.map(item => ({
+                id: item.id,
+                quantity: item.quantity
+            }))
         });
 
         elements.value = stripe.value.elements({ clientSecret: data.clientSecret });
-
         const paymentElement = elements.value.create('payment');
         paymentElement.mount('#payment-element');
         
         isLoading.value = false;
     } catch (e) {
-        errorMessage.value = "Failed to load payment system.";
+        errorMessage.value = "Failed to initialize cart checkout.";
     }
 });
 
