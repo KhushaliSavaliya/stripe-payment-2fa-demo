@@ -43,7 +43,7 @@ const handleSubmit = async () => {
     const { error } = await stripe.value.confirmPayment({
         elements: elements.value,
         confirmParams: {
-            return_url: window.location.origin + '/dashboard',
+            return_url: route('checkout.success', {}, true), 
         },
     });
 

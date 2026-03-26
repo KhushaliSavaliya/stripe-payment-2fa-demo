@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Inertia\Inertia;
+use Stripe\StripeClient;
+
 class StripePaymentController extends Controller
 {
     public function show($id)
@@ -73,6 +75,30 @@ class StripePaymentController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function success(Request $request)
+    {
+        $stripe = new StripeClient(config('services.stripe.secret'));
+
+        try {
+            $intent = $stripe->paymentIntents->retrieve($request->payment_intent);
+
+            if ($intent->status === 'succeeded') {
+                $order = Order::where('stripe_payment_intent_id', $intent->id)->first();
+
+                if ($order && $order->status !== 'paid') {
+                    $order->update(['status' => 'paid']);
+                }
+
+                return Inertia::render('Stripe/Success', [
+                    'order' => $order->load('items.product'),
+                    'amount' => $intent->amount_received / 100
+                ]);
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
         }
     }
 }

@@ -26,9 +26,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout/{id}', [StripePaymentController::class, 'show'])->name('checkout');
     Route::post('/payment/intent', [StripePaymentController::class, 'createIntent'])->name('payment.intent');
 
-    Route::get('/cart', function () {
+    Route::get('/checkout/cart', function () {
         return Inertia::render('Stripe/Cart'); // We will create this file next
     })->name('checkout.cart');
+
+    Route::get('/checkout/success', [StripePaymentController::class, 'success'])->name('checkout.success');
 });
 
 Route::middleware('auth')->group(function () {
