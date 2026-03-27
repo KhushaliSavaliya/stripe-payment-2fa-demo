@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripePaymentController;
 use App\Models\Product;
@@ -31,6 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('checkout.cart');
 
     Route::get('/checkout/success', [StripePaymentController::class, 'success'])->name('checkout.success');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
 Route::middleware('auth')->group(function () {
