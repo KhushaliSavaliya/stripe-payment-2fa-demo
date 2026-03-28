@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Inertia\Inertia;
@@ -80,24 +81,36 @@ class StripePaymentController extends Controller
 
     public function success(Request $request)
     {
-        $stripe = new StripeClient(config('services.stripe.secret'));
+        // Use the Secret from config for security
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
 
         try {
+            // 1. Retrieve the intent
             $intent = $stripe->paymentIntents->retrieve($request->payment_intent);
 
             if ($intent->status === 'succeeded') {
+                // 2. Find the order
                 $order = Order::where('stripe_payment_intent_id', $intent->id)->first();
 
-                if ($order && $order->status !== 'paid') {
+                if (!$order) {
+                    return redirect()->route('dashboard')->with('error', 'Order not found.');
+                }
+
+                // 3. Update status if not already paid
+                if ($order->status !== 'paid') {
                     $order->update(['status' => 'paid']);
                 }
 
-                return Inertia::render('Stripe/Success', [
-                    'order' => $order->load('items.product'),
-                    'amount' => $intent->amount_received / 100
-                ]);
+                // 4. REDIRECT to the Order History or specific Order Show page
+                // This triggers your new Toast notification!
+                return redirect()->route('orders.index')->with('message', 'Payment successful! Your order #' . $order->id . ' is confirmed.');
             }
+            
+            return redirect()->route('dashboard')->with('error', 'Payment was not successful.');
+
         } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Stripe Success Error: " . $e->getMessage());
             return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
         }
     }
