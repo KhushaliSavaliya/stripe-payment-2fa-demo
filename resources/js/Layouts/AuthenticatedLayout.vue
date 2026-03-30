@@ -8,8 +8,10 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Toast.vue';
 import { Link } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
+import CartSidebar from '@/Components/CartSidebar.vue';
 
 const { items, total } = useCart();
+const isCartOpen = ref(false);
 const showingNavigationDropdown = ref(false);
 </script>
 
@@ -45,10 +47,16 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <div class="flex items-center ms-10">
-                                <Link :href="route('checkout.cart')" class="text-sm font-medium text-gray-700">
-                                    🛒 Cart ({{ items.length }} items) - ${{ (total / 100).toFixed(2) }}
-                                </Link>
+                                <button 
+                                    @click="isCartOpen = true" 
+                                    class="text-sm font-medium text-gray-700 hover:text-indigo-600 transition flex items-center gap-2"
+                                >
+                                    <span>🛒</span>
+                                    <span>Cart ({{ items.length }}) - ${{ (total / 100).toFixed(2) }}</span>
+                                </button>
                             </div>
+
+                            <CartSidebar :isOpen="isCartOpen" @close="isCartOpen = false" />
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
