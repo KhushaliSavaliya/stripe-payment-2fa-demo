@@ -38,5 +38,23 @@ export const useCart = () => {
         localStorage.removeItem('cart');
     };
 
-    return { items: computed(() => state.items), addToCart, removeFromCart, total, clearCart };
+    const updateQuantity = (id, amount) => {
+        const item = state.items.find(i => i.id === id);
+        if (item) {
+            item.quantity += amount;
+            if (item.quantity <= 0) {
+                removeFromCart(id);
+            }
+        }
+        saveCart();
+    };
+
+    return { 
+        items: computed(() => state.items), 
+        addToCart, 
+        removeFromCart, 
+        updateQuantity, // Export this
+        total, 
+        clearCart 
+    };
 };

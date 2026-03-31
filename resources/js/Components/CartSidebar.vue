@@ -2,19 +2,9 @@
 import { useCart } from '@/cart.js';
 import { Link } from '@inertiajs/vue3';
 
-const { items, total, removeFromCart, addToCart } = useCart();
+const { items, total, removeFromCart, addToCart, updateQuantity } = useCart();
 defineProps({ isOpen: Boolean });
 defineEmits(['close']);
-
-const updateQuantity = (item, amount) => {
-    if (amount === -1 && item.quantity === 1) {
-        removeFromCart(item.id);
-    } else {
-        // Simple logic: adding 1 uses our existing addToCart
-        // subtracting 1 we can add a 'decrement' to cart.js later
-        item.quantity += amount;
-    }
-};
 </script>
 
 <template>
@@ -51,13 +41,23 @@ const updateQuantity = (item, amount) => {
                         <span>Total:</span>
                         <span>${{ (total / 100).toFixed(2) }}</span>
                     </div>
-                    <Link 
-                        v-if="items.length > 0"
-                        :href="route('checkout.cart')" 
-                        class="block w-full bg-indigo-600 text-white text-center py-3 rounded-lg font-bold hover:bg-indigo-700"
-                    >
-                        Review & Checkout
-                    </Link>
+                    
+                    <div class="space-y-3">
+                        <Link 
+                            :href="route('checkout.index')" 
+                            class="block w-full bg-indigo-600 text-white text-center py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg"
+                        >
+                            Checkout Now
+                        </Link>
+                        
+                        <Link 
+                            :href="route('checkout.cart')" 
+                            @click="$emit('close')"
+                            class="block w-full text-center text-gray-600 text-sm hover:underline"
+                        >
+                            View Full Cart
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
