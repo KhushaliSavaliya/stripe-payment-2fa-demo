@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -13,6 +13,12 @@ import CartSidebar from '@/Components/CartSidebar.vue';
 const { items, total } = useCart();
 const isCartOpen = ref(false);
 const showingNavigationDropdown = ref(false);
+const isPulsing = ref(false);
+
+watch(() => items.value.length, () => {
+    isPulsing.value = true;
+    setTimeout(() => isPulsing.value = false, 300);
+});
 </script>
 
 <template>
@@ -49,7 +55,10 @@ const showingNavigationDropdown = ref(false);
                             <div class="flex items-center ms-10">
                                 <button 
                                     @click="isCartOpen = true" 
-                                    class="text-sm font-medium text-gray-700 hover:text-indigo-600 transition flex items-center gap-2"
+                                    :class="[
+                                        'text-sm font-medium text-gray-700 hover:text-indigo-600 transition flex items-center gap-2', 
+                                        { 'cart-animate': isPulsing }
+                                    ]"
                                 >
                                     <span>🛒</span>
                                     <span>Cart ({{ items.length }}) - ${{ (total / 100).toFixed(2) }}</span>

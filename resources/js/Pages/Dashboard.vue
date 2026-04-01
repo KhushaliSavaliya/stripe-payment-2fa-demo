@@ -3,8 +3,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
 
+const { addToCart, updateQuantity, items } = useCart();
 
-const { addToCart, items } = useCart();
+const getQty = (id) => {
+    const item = items.value.find(i => i.id === id);
+    return item ? item.quantity : 0;
+};
 
 defineProps({
     products: Array
@@ -36,12 +40,11 @@ defineProps({
                                     ${{ (product.price / 100).toFixed(2) }}
                                 </span>
                                 
-                                <!-- <Link 
-                                    :href="route('checkout', product.id)" 
-                                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-                                >
-                                    Buy Now
-                                </Link> -->
+                                <div v-if="getQty(product.id) > 0" class="flex items-center gap-3 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-200">
+                                    <button @click="updateQuantity(product.id, -1)" class="text-indigo-600 font-bold px-2 hover:bg-indigo-100 rounded">-</button>
+                                    <span class="font-bold text-indigo-700">{{ getQty(product.id) }}</span>
+                                    <button @click="updateQuantity(product.id, 1)" class="text-indigo-600 font-bold px-2 hover:bg-indigo-100 rounded">+</button>
+                                </div>
                                 <button 
                                     @click="addToCart(product)"
                                     class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"

@@ -44,7 +44,7 @@ defineEmits(['close']);
                     
                     <div class="space-y-3">
                         <Link 
-                            :href="route('checkout.index')" 
+                            :href="route('checkout.cart')" 
                             class="block w-full bg-indigo-600 text-white text-center py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg"
                         >
                             Checkout Now
@@ -63,3 +63,15 @@ defineEmits(['close']);
         </div>
     </div>
 </template>
+
+<style scoped>
+@keyframes pulse-cart {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cart-animate {
+    animation: pulse-cart 0.3s ease-in-out;
+}
+</style>
