@@ -37,4 +37,15 @@ class OrderController extends Controller
             'order' => $order->load('items.product')
         ]);
     }
+
+    public function syncCart(Request $request)
+    {
+        $request->validate(['items' => 'required|array']);
+        
+        $request->user()->update([
+            'cart_data' => json_encode($request->items)
+        ]);
+
+        return response()->json(['status' => 'synced']);
+    }
 }

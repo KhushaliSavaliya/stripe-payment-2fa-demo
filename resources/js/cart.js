@@ -1,4 +1,5 @@
 import { reactive, computed } from 'vue';
+import axios from 'axios';
 
 // The actual cart data
 const state = reactive({
@@ -48,6 +49,15 @@ export const useCart = () => {
         }
         saveCart();
     };
+
+    watch(() => state.items, (newItems) => {
+        localStorage.setItem('cart', JSON.stringify(newItems));
+        
+        if (newItems.length > 0) {
+            axios.post(route('cart.sync'), { items: newItems })
+                .catch(err => console.error("Cart sync failed", err));
+        }
+    }, { deep: true });
 
     return { 
         items: computed(() => state.items), 

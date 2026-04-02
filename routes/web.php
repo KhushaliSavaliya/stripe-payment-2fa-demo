@@ -35,6 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    Route::post('/cart/sync', [OrderController::class, 'syncCart'])->name('cart.sync');
 });
 
 Route::middleware('auth')->group(function () {
