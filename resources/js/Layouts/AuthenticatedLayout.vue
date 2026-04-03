@@ -54,7 +54,7 @@ watch(() => items.value.length, () => {
 
                             <div class="flex items-center ms-10">
                                 <button 
-                                    @click="isCartOpen = true" 
+                                    @click="isCartOpen=true" 
                                     :class="[
                                         'text-sm font-medium text-gray-700 hover:text-indigo-600 transition flex items-center gap-2', 
                                         { 'cart-animate': isPulsing }
@@ -63,9 +63,7 @@ watch(() => items.value.length, () => {
                                     <span>🛒</span>
                                     <span>Cart ({{ items.length }}) - ${{ (total / 100).toFixed(2) }}</span>
                                 </button>
-                            </div>
-
-                            <CartSidebar :isOpen="isCartOpen" @close="isCartOpen = false" />
+                            </div>                            
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
@@ -222,5 +220,18 @@ watch(() => items.value.length, () => {
                 <slot />
             </main>
         </div>
+        <CartSidebar :isOpen="isCartOpen" @close="isCartOpen = false" />
     </div>
 </template>
+
+<style scoped>
+@keyframes pulse-cart {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.cart-animate {
+    animation: pulse-cart 0.3s ease-in-out;
+}
+</style>

@@ -25,9 +25,9 @@ defineEmits(['close']);
                             <div class="flex-1">
                                 <p class="font-bold">{{ item.name }}</p>
                                 <div class="flex items-center gap-3 mt-2">
-                                    <button @click="updateQuantity(item, -1)" class="bg-gray-200 px-2 rounded">-</button>
+                                    <button @click="updateQuantity(item.id, -1)" class="bg-gray-200 px-2 rounded">-</button>
                                     <span>{{ item.quantity }}</span>
-                                    <button @click="updateQuantity(item, 1)" class="bg-gray-200 px-2 rounded">+</button>
+                                    <button @click="updateQuantity(item.id, 1)" class="bg-gray-200 px-2 rounded">+</button>
                                 </div>
                             </div>
                             <p class="font-bold">${{ ((item.price * item.quantity) / 100).toFixed(2) }}</p>

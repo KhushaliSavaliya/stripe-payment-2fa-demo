@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import axios from 'axios';
 
 // The actual cart data
