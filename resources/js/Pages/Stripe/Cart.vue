@@ -31,7 +31,7 @@ const { items, total, removeFromCart } = useCart();
 
                         <div class="mt-8 flex justify-between items-center">
                             <span class="text-2xl font-bold">Total: ${{ (total / 100).toFixed(2) }}</span>
-                            <Link :href="route('checkout', 'cart')" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700">
+                            <Link :href="route('checkout.cart')" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700">
                                 Proceed to Checkout
                             </Link>
                         </div>
