@@ -2,6 +2,17 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
+import { onMounted, ref } from 'vue';
+import axios from 'axios';
+
+const stockErrors = ref([]);
+
+onMounted(async () => {
+    const response = await axios.post(route('cart.validate'), { items: items.value });
+    if (response.data.errors.length > 0) {
+        stockErrors.value = response.data.errors;
+    }
+});
 
 const { items, total, removeFromCart } = useCart();
 </script>
@@ -12,6 +23,14 @@ const { items, total, removeFromCart } = useCart();
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Shopping Cart</h2>
+        </template>
+        <template>
+            <div v-if="stockErrors.length > 0" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                <p class="font-bold">Inventory Notice:</p>
+                <ul class="list-disc ml-5">
+                    <li v-for="error in stockErrors" :key="error">{{ error }}</li>
+                </ul>
+            </div>
         </template>
 
         <div class="py-12">

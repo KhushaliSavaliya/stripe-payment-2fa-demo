@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Models\Product;
 
 class OrderController extends Controller
 {
@@ -47,5 +48,20 @@ class OrderController extends Controller
         ]);
 
         return response()->json(['status' => 'synced']);
+    }
+
+    public function validateStock(Request $request)
+    {
+        $cartItems = $request->input('items');
+        $errors = [];
+
+        foreach ($cartItems as $item) {
+            $product = Product::find($item['id']);
+            if (!$product || $product->stock < $item['quantity']) {
+                $errors[] = "Only {$product->stock} units of {$product->name} are available.";
+            }
+        }
+
+        return response()->json(['errors' => $errors]);
     }
 }
