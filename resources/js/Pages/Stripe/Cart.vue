@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
@@ -13,6 +13,14 @@ onMounted(async () => {
         stockErrors.value = response.data.errors;
     }
 });
+
+const handleCheckout = () => {
+    // Send the whole cart to the backend
+    router.post(route('checkout.process'), {
+        items: items.value,
+        total: total.value
+    });
+};
 
 const { items, total, removeFromCart } = useCart();
 </script>
@@ -50,9 +58,12 @@ const { items, total, removeFromCart } = useCart();
 
                         <div class="mt-8 flex justify-between items-center">
                             <span class="text-2xl font-bold">Total: ${{ (total / 100).toFixed(2) }}</span>
-                            <Link :href="route('checkout.cart')" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700">
+                            <button 
+                                @click="handleCheckout" 
+                                class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 w-full"
+                            >
                                 Proceed to Checkout
-                            </Link>
+                            </button>
                         </div>
                     </div>
                     

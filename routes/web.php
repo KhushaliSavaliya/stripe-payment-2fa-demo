@@ -37,6 +37,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     Route::post('/cart/sync', [OrderController::class, 'syncCart'])->name('cart.sync');
+
+    Route::post('/checkout/process', [StripePaymentController::class, 'checkout'])->name('checkout.process');
 });
 
 Route::middleware('auth')->group(function () {

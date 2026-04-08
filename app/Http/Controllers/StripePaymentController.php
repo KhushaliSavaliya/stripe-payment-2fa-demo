@@ -114,4 +114,29 @@ class StripePaymentController extends Controller
             return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
         }
     }
+
+    public function checkout(Request $request)
+    {
+        $cartItems = $request->input('items'); // Data sent from your Vue frontend
+        
+        // Convert your cart items into Stripe "Line Items"
+        $lineItems = array_map(function($item) {
+            return [
+                'price_data' => [
+                    'currency' => 'usd',
+                    'product_data' => [
+                        'name' => $item['name'],
+                    ],
+                    'unit_amount' => $item['price'], // Price in cents
+                ],
+                'quantity' => $item['quantity'],
+            ];
+        }, $cartItems);
+
+        // We return this to Vue to initialize the Stripe Checkout
+        return Inertia::render('Stripe/Checkout', [
+            'lineItems' => $lineItems,
+            'total' => $request->input('total')
+        ]);
+    }
 }
