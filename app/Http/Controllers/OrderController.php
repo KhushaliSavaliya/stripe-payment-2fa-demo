@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Order;
@@ -63,5 +64,21 @@ class OrderController extends Controller
         }
 
         return response()->json(['errors' => $errors]);
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $coupon = Coupon::where('code', $request->code)
+                        ->where('is_active', true)
+                        ->first();
+
+        if (!$coupon) {
+            return response()->json(['message' => 'Invalid or expired coupon.'], 422);
+        }
+
+        return response()->json([
+            'code' => $coupon->code,
+            'discount_percent' => $coupon->discount_percent
+        ]);
     }
 }

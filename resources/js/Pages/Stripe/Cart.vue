@@ -6,6 +6,8 @@ import { onMounted, ref } from 'vue';
 import axios from 'axios';
 
 const stockErrors = ref([]);
+const couponCode = ref('');
+const discount = ref(0);
 
 onMounted(async () => {
     const response = await axios.post(route('cart.validate'), { items: items.value });
@@ -21,6 +23,21 @@ const handleCheckout = () => {
         total: total.value
     });
 };
+
+const applyDiscount = async () => {
+    try {
+        const response = await axios.post(route('cart.coupon'), { code: couponCode.value });
+        discount.value = response.data.discount_percent;
+        alert(`Applied ${discount.value}% discount!`);
+    } catch (error) {
+        alert(error.response.data.message);
+    }
+};
+
+const discountedTotal = computed(() => {
+    const totalCents = total.value;
+    return totalCents - (totalCents * (discount.value / 100));
+});
 
 const { items, total, removeFromCart } = useCart();
 </script>
@@ -56,8 +73,17 @@ const { items, total, removeFromCart } = useCart();
                             </div>
                         </div>
 
+                        <div class="mt-4 flex gap-2">
+                            <input v-model="couponCode" placeholder="Enter Promo Code" class="border rounded px-3 py-2 flex-1" />
+                            <button @click="applyDiscount" class="bg-gray-800 text-white px-4 py-2 rounded">Apply</button>
+                        </div>
+
+                        <div class="mt-4 text-xl font-bold">
+                            <p v-if="discount > 0" class="text-green-600 text-sm">Discount Applied: {{ discount }}%</p>
+                        </div>
+                        
                         <div class="mt-8 flex justify-between items-center">
-                            <span class="text-2xl font-bold">Total: ${{ (total / 100).toFixed(2) }}</span>
+                            <span>Final Total: ${{ (discountedTotal / 100).toFixed(2) }}</span>
                             <button 
                                 @click="handleCheckout" 
                                 class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 w-full"
