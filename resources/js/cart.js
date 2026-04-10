@@ -7,6 +7,13 @@ const state = reactive({
 });
 
 export const useCart = () => {
+
+    const playSound = (type) => {
+        const audio = new Audio(type === 'add' ? '/sounds/add.mp3' : '/sounds/remove.mp3');
+        audio.volume = 0.2;
+        audio.play().catch(() => {}); // Catch block prevents errors if browser blocks autoplay
+    };
+
     // Add item to cart
     const addToCart = (product) => {
         const existingItem = state.items.find(i => i.id === product.id);
@@ -16,12 +23,14 @@ export const useCart = () => {
             state.items.push({ ...product, quantity: 1 });
         }
         saveCart();
+        playSound('add');
     };
 
     // Remove item
     const removeFromCart = (id) => {
         state.items = state.items.filter(i => i.id !== id);
         saveCart();
+        playSound('remove');
     };
 
     // Total price calculation

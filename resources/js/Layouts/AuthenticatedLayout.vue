@@ -10,6 +10,7 @@ import { Link } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
 import CartSidebar from '@/Components/CartSidebar.vue';
 
+const notification = ref(null);
 const { items, total } = useCart();
 const isCartOpen = ref(false);
 const showingNavigationDropdown = ref(false);
@@ -19,6 +20,12 @@ watch(() => items.value.length, () => {
     isPulsing.value = true;
     setTimeout(() => isPulsing.value = false, 300);
 });
+
+const showToast = (msg) => {
+    notification.value = msg;
+    setTimeout(() => notification.value = null, 3050);
+};
+
 </script>
 
 <template>
@@ -203,7 +210,7 @@ watch(() => items.value.length, () => {
                 </div>
             </nav>
 
-            <Toast />
+            <Toast v-if="notification" :message="notification" />
 
             <!-- Page Heading -->
             <header

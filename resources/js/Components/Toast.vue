@@ -1,26 +1,29 @@
 <script setup>
-import { watch, ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
 
-const page = usePage();
-const show = ref(false);
-const message = ref('');
+const props = defineProps({
+    message: String,
+    type: { type: String, default: 'success' }
+});
 
-watch(() => page.props.flash.message, (newMessage) => {
-    if (newMessage) {
-        message.value = newMessage;
-        show.value = true;
-        setTimeout(() => show.value = false, 5000); // Hide after 5 seconds
-    }
-}, { immediate: true });
+const visible = ref(true);
+
+onMounted(() => {
+    setTimeout(() => visible.value = false, 3000);
+});
 </script>
 
 <template>
-    <div v-if="show" class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-all">
-        <div class="flex items-center gap-3">
-            <span>✅</span>
-            <p class="font-bold">{{ message }}</p>
-            <button @click="show = false" class="ml-4 hover:text-gray-200">✕</button>
+    <Transition name="fade">
+        <div v-if="visible" 
+             :class="type === 'success' ? 'bg-green-600' : 'bg-red-600'"
+             class="fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-2xl z-[100] flex items-center gap-3">
+            <span>{{ message }}</span>
         </div>
-    </div>
+    </Transition>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
