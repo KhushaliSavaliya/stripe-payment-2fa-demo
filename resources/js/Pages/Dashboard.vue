@@ -2,8 +2,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
+import { trackViewedProduct } from '@/utils/history.js';
 
 const { addToCart, updateQuantity, items } = useCart();
+
+const handleViewProduct = (product) => {
+    trackViewedProduct(product);
+    addToCart(product);
+};
 
 const getQty = (id) => {
     const item = items.value.find(i => i.id === id);
@@ -29,7 +35,8 @@ defineProps({
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div v-for="product in products" :key="product.id" class="overflow-hidden bg-white shadow-sm sm:rounded-lg border border-gray-200">
-                        <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover">
+                        <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition"
+                        @click="trackViewedProduct(product)">
                         
                         <div class="p-6 text-gray-900">
                             <h3 class="text-lg font-bold">{{ product.name }}</h3>
@@ -46,7 +53,7 @@ defineProps({
                                     <button @click="updateQuantity(product.id, 1)" class="text-indigo-600 font-bold px-2 hover:bg-indigo-100 rounded">+</button>
                                 </div>
                                 <button 
-                                    @click="addToCart(product)"
+                                    @click="handleViewProduct(product)"
                                     class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
                                 >
                                     Add to Cart ({{ items.filter(i => i.id === product.id)[0]?.quantity || 0 }})

@@ -8,12 +8,14 @@ import axios from 'axios';
 const stockErrors = ref([]);
 const couponCode = ref('');
 const discount = ref(0);
+const recentViews = ref([]);
 
 onMounted(async () => {
     const response = await axios.post(route('cart.validate'), { items: items.value });
     if (response.data.errors.length > 0) {
         stockErrors.value = response.data.errors;
     }
+    recentViews.value = JSON.parse(localStorage.getItem('recent_views') || '[]');
 });
 
 const handleCheckout = () => {
@@ -46,6 +48,19 @@ const { items, total, removeFromCart } = useCart();
     <Head title="Your Cart" />
 
     <AuthenticatedLayout>
+        <template>
+            <div v-if="recentViews.length > 0" class="mt-12 border-t pt-8">
+                <h3 class="text-lg font-bold mb-4">Recently Viewed</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div v-for="product in recentViews" :key="product.id" class="bg-gray-50 p-3 rounded-lg">
+                        <p class="font-medium text-sm truncate">{{ product.name }}</p>
+                        <button @click="addToCart(product)" class="text-indigo-600 text-xs font-bold hover:underline">
+                            + Add Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Shopping Cart</h2>
         </template>
