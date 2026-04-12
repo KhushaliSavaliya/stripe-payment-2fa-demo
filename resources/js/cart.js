@@ -11,7 +11,7 @@ export const useCart = () => {
     const playSound = (type) => {
         const audio = new Audio(type === 'add' ? '/sounds/add.mp3' : '/sounds/remove.mp3');
         audio.volume = 0.2;
-        audio.play().catch(() => {}); // Catch block prevents errors if browser blocks autoplay
+        audio.play().catch(() => { }); // Catch block prevents errors if browser blocks autoplay
     };
 
     // Add item to cart
@@ -50,30 +50,40 @@ export const useCart = () => {
 
     const updateQuantity = (id, amount) => {
         const item = state.items.find(i => i.id === id);
+
         if (item) {
+            if (amount > 0) {
+                playSound('add');
+            }
+
             item.quantity += amount;
+
             if (item.quantity <= 0) {
                 removeFromCart(id);
+                playSound('remove');
+            } else if (amount < 0) {
+                playSound('remove');
             }
         }
+
         saveCart();
     };
 
     watch(() => state.items, (newItems) => {
         localStorage.setItem('cart', JSON.stringify(newItems));
-        
+
         if (newItems.length > 0) {
             axios.post(route('cart.sync'), { items: newItems })
                 .catch(err => console.error("Cart sync failed", err));
         }
     }, { deep: true });
 
-    return { 
-        items: computed(() => state.items), 
-        addToCart, 
-        removeFromCart, 
+    return {
+        items: computed(() => state.items),
+        addToCart,
+        removeFromCart,
         updateQuantity, // Export this
-        total, 
-        clearCart 
+        total,
+        clearCart
     };
 };
