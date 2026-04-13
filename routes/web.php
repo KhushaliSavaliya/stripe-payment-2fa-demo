@@ -39,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/cart/sync', [OrderController::class, 'syncCart'])->name('cart.sync');
 
     Route::post('/checkout/process', [StripePaymentController::class, 'checkout'])->name('checkout.process');
+
+    Route::post('/cart/coupon', [StripePaymentController::class, 'applyCoupon'])->name('cart.coupon');
 });
 
 Route::middleware('auth')->group(function () {

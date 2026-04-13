@@ -139,4 +139,22 @@ class StripePaymentController extends Controller
             'total' => $request->input('total')
         ]);
     }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['code' => 'required|string']);
+
+        $coupon = \App\Models\Coupon::where('code', $request->code)
+                    ->where('is_active', true)
+                    ->first();
+
+        if (!$coupon) {
+            return response()->json(['message' => 'Invalid or expired coupon code.'], 422);
+        }
+
+        return response()->json([
+            'code' => $coupon->code,
+            'discount_percent' => $coupon->discount_percent
+        ]);
+    }
 }
