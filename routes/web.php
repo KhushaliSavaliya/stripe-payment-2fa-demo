@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/admin/coupons', [CouponController::class, 'index'])->name('coupons.index');
     Route::delete('/admin/coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
+    Route::patch('/admin/coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('coupons.toggle');
 });
 
 Route::middleware('auth')->group(function () {

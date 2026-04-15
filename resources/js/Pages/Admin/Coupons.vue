@@ -9,6 +9,10 @@ const deleteCoupon = (id) => {
         router.delete(route('coupons.destroy', id));
     }
 };
+
+const toggleStatus = (id) => {
+    router.patch(route('coupons.toggle', id));
+};
 </script>
 
 <template>
@@ -32,9 +36,13 @@ const deleteCoupon = (id) => {
                                 <td class="py-3 font-mono text-indigo-600">{{ coupon.code }}</td>
                                 <td class="py-3">{{ coupon.discount_percent }}%</td>
                                 <td class="py-3">
-                                    <span :class="coupon.is_active ? 'text-green-600' : 'text-red-600'">
+                                    <button 
+                                        @click="toggleStatus(coupon.id)"
+                                        :class="coupon.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                        class="px-3 py-1 rounded-full text-xs font-semibold hover:opacity-75 transition"
+                                    >
                                         {{ coupon.is_active ? 'Active' : 'Inactive' }}
-                                    </span>
+                                    </button>
                                 </td>
                                 <td class="py-3">
                                     <button @click="deleteCoupon(coupon.id)" class="text-red-500 hover:underline">Delete</button>

@@ -20,4 +20,13 @@ class CouponController extends Controller
         $coupon->delete();
         return back()->with('message', 'Coupon deleted successfully');
     }
+
+    public function toggle(Coupon $coupon)
+    {
+        $coupon->update([
+            'is_active' => !$coupon->is_active
+        ]);
+
+        return back()->with('message', 'Coupon status updated.');
+    }
 }
