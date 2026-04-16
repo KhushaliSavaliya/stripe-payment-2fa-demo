@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/cart/coupon', [StripePaymentController::class, 'applyCoupon'])->name('cart.coupon');
 
     Route::get('/admin/coupons', [CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/admin/coupons', [CouponController::class, 'store'])->name('coupons.store');
     Route::delete('/admin/coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
     Route::patch('/admin/coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('coupons.toggle');
 });

@@ -29,4 +29,16 @@ class CouponController extends Controller
 
         return back()->with('message', 'Coupon status updated.');
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|unique:coupons,code|max:20',
+            'discount_percent' => 'required|integer|min:1|max:100',
+        ]);
+
+        Coupon::create($validated + ['is_active' => true]);
+
+        return back()->with('message', 'Coupon created successfully!');
+    }
 }
