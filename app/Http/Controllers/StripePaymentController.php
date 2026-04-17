@@ -142,14 +142,22 @@ class StripePaymentController extends Controller
 
     public function applyCoupon(Request $request)
     {
-        $request->validate(['code' => 'required|string']);
-
-        $coupon = \App\Models\Coupon::where('code', $request->code)
+        $coupon = Coupon::where('code', $request->code)
                     ->where('is_active', true)
                     ->first();
 
         if (!$coupon) {
-            return response()->json(['message' => 'Invalid or expired coupon code.'], 422);
+            return response()->json(['message' => 'Invalid coupon.'], 422);
+        }
+
+        // 1. Check Expiry
+        if ($coupon->expires_at && $coupon->expires_at->isPast()) {
+            return response()->json(['message' => 'This coupon has expired.'], 422);
+        }
+
+        // 2. Check Usage Limit
+        if ($coupon->used_count >= $coupon->max_uses) {
+            return response()->json(['message' => 'This coupon has reached its usage limit.'], 422);
         }
 
         return response()->json([

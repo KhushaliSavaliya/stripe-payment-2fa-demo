@@ -72,6 +72,8 @@ const submit = () => {
                             <tr class="border-b">
                                 <th class="py-2">Code</th>
                                 <th class="py-2">Discount</th>
+                                <th class="py-2">Usage</th>
+                                <th class="py-2">Expires</th>
                                 <th class="py-2">Status</th>
                                 <th class="py-2">Actions</th>
                             </tr>
@@ -80,6 +82,12 @@ const submit = () => {
                             <tr v-for="coupon in coupons" :key="coupon.id" class="border-b hover:bg-gray-50">
                                 <td class="py-3 font-mono text-indigo-600">{{ coupon.code }}</td>
                                 <td class="py-3">{{ coupon.discount_percent }}%</td>
+                                <td class="py-3 text-sm">
+                                    {{ coupon.used_count }} / {{ coupon.max_uses }}
+                                </td>
+                                <td class="py-3 text-sm">
+                                    {{ coupon.expires_at ? new Date(coupon.expires_at).toLocaleDateString() : 'Never' }}
+                                </td>
                                 <td class="py-3">
                                     <button 
                                         @click="toggleStatus(coupon.id)"
