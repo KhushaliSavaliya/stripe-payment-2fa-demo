@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useCart } from '@/cart.js';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 
 const stockErrors = ref([]);
@@ -42,6 +42,46 @@ const discountedTotal = computed(() => {
 });
 
 const { items, total, removeFromCart } = useCart();
+
+const timeLeft = ref('');
+let timerInterval = null;
+
+const startTimer = (expiryDate) => {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = new Date(expiryDate).getTime() - now;
+
+        if (distance < 0) {
+            clearInterval(timerInterval);
+            timeLeft.value = "EXPIRED";
+            appliedCoupon.value = null; // Auto-remove coupon if it expires while they watch
+            return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        timeLeft.value = `${hours}h ${minutes}m ${seconds}s`;
+    };
+
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+};
+
+// Start timer if the applied coupon has an expiry
+watch(appliedCoupon, (newVal) => {
+    if (newVal?.expires_at) {
+        startTimer(newVal.expires_at);
+    } else {
+        clearInterval(timerInterval);
+        timeLeft.value = '';
+    }
+});
+
+onUnmounted(() => clearInterval(timerInterval));
 </script>
 
 <template>
@@ -96,6 +136,17 @@ const { items, total, removeFromCart } = useCart();
                         <div class="mt-4 text-xl font-bold">
                             <p v-if="discount > 0" class="text-green-600 text-sm">Discount Applied: {{ discount }}%</p>
                         </div>
+                        <div v-if="appliedCoupon && appliedCoupon.expires_at" 
+                            class="mt-4 p-3 bg-orange-100 border-l-4 border-orange-500 text-orange-700 flex justify-between items-center animate-pulse">
+                            <div>
+                                <span class="font-bold">Hurry!</span> This offer expires in:
+                            </div>
+                            <div class="font-mono font-bold text-lg">
+                                {{ timeLeft }}
+                            </div>
+                        </div>
+
+
                         
                         <div class="mt-8 flex justify-between items-center">
                             <span>Final Total: ${{ (discountedTotal / 100).toFixed(2) }}</span>
