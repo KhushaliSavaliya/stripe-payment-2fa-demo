@@ -30,6 +30,7 @@ class StripePaymentController extends Controller
             'items' => 'required|array',
             'items.*.id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'coupon_code' => 'nullable|string', // Add this
         ]);
 
         Stripe::setApiKey(config('services.stripe.secret'));
@@ -41,12 +42,12 @@ class StripePaymentController extends Controller
                 'status' => 'pending',
             ]);
 
-            $total = 0;
+            $subtotal = 0;
 
             foreach ($request->items as $item) {
                 $product = Product::find($item['id']);
                 $itemTotal = $product->price * $item['quantity'];
-                $total += $itemTotal;
+                $subtotal += $itemTotal;
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -56,15 +57,32 @@ class StripePaymentController extends Controller
                 ]);
             }
 
-            $order->update(['total_amount' => $total]);
+            // --- NEW COUPON CALCULATION ---
+            $finalTotal = $subtotal;
+            if ($request->coupon_code) {
+                $coupon = \App\Models\Coupon::where('code', $request->coupon_code)
+                            ->where('is_active', true)
+                            ->first();
+
+                if ($coupon && (!$coupon->expires_at || $coupon->expires_at->isFuture()) && $coupon->used_count < $coupon->max_uses) {
+                    $discountAmount = ($subtotal * ($coupon->discount_percent / 100));
+                    $finalTotal = $subtotal - $discountAmount;
+                    
+                    // Track that the coupon was used
+                    $coupon->increment('used_count');
+                    $order->update(['coupon_id' => $coupon->id]); // Assuming you add coupon_id to orders
+                }
+            }
+            // ------------------------------
+
+            $order->update(['total_amount' => $finalTotal]);
 
             $intent = PaymentIntent::create([
-                'amount' => $total,
+                'amount' => (int) $finalTotal, // Stripe needs integers (cents)
                 'currency' => 'usd',
                 'automatic_payment_methods' => ['enabled' => true],
                 'metadata' => [
                     'order_id' => $order->id,
-                    'user_id' => auth()->id(),
                 ],
             ]);
 
