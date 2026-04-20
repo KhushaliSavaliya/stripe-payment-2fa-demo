@@ -41,7 +41,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/process', [StripePaymentController::class, 'checkout'])->name('checkout.process');
 
     Route::post('/cart/coupon', [StripePaymentController::class, 'applyCoupon'])->name('cart.coupon');
-
     Route::get('/admin/coupons', [CouponController::class, 'index'])->name('coupons.index');
     Route::post('/admin/coupons', [CouponController::class, 'store'])->name('coupons.store');
     Route::delete('/admin/coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
